@@ -1,0 +1,87 @@
+// Después de la instalación de CENTOS7 en el virtual box // 
+
+Logueamos con nuestro usuario y password de inicio.
+localhost login: *** 
+Password: *****
+---> [root@localhost ~]# // significa que estamos dentro
+Modificamos la hora.
+#rm -f /etc/localtime
+#ln -s /usr/share/zoneinfo/UTC /etc/localtime
+#date
+---> Tue Feb 28 13:37:53 UTC 2017 
+Empezamos instalando los paquetes
+ #yum install vim
+ #yum install wget
+ //comandos necesarios para movernos en  RHEL (Centos7)
+ #yum install httpd htttpd-devel 
+ #yum install mysql mysql-server 
+ #yum install mariadb-server -y
+ #yum install php-mysql php-pear php-common php-gd php-devel php php-mbstring php-cli
+ #yum install php-snmp
+ #yum install net-snmp-utils net-snmp-libs
+ #yum install rrdtool
+      # systemctl start httpd.service
+      # systemctl start mariadb.service
+      # systemctl start snmpd.service
+      # systemctl enable httpd.service
+      # systemctl enable mariadb.service
+      # systemctl enable snmpd.service
+#yum install epel-release -y
+#yum install cacti
+#mysqeladmin -u root password **** // pones un psswd para el database maridb
+#mysql -u root -p
+---> Enter ur password: ****
+    MariaDB [(none)]> create database cacti;
+    MariaDB [(none)]> GRANT ALL ON cacti.* TO cacti@localhost IDENTIFIED BY 'psswd';
+    MariaDB [(none)]> FLUSH privileges;
+    MariaDB [(none)]> quit;
+#rpm -ql cacti | grep cacti.sql // encontrar la ubicación del cacti
+---> /usr/share/doc/cacti-1.1.16/cacti.sql  // cacti-1.1.16 es la version que instale
+#mysql -u cacti -p cacti < /usr/share/doc/cacti-1.1.16/cacti.sql
+---> Enter ur password: ****
+#vi  /etc/cacti/db.php
+---> Se abrirá un editor de texto tipo none (para terminal) donde deberás asegurarte de editar lo siguiete
+      $database_type = "mysql";
+      $database_default = "cacti";
+      $database_hostname = "localhost";
+      $database_username = "cacti";
+      $database_password = "****"; // psswd del database
+      $database_port = "3306";
+      $database_ssl = false;
+ # firewall-cmd --permanent --zone=public --add-service =http
+ # firewall-cmd --reload
+ #vi /etc/httpd/conf.d/cacti.conf
+ ---> Se abrirá un editor de texto tipo none (para terminal) donde deberás asegurarte de editar lo siguiente
+      <Directory /usr/share/cacti/>
+      <IfModule mod_authz_core_c>
+      # httpd 2.4
+      Require all granted
+      </IfModule>
+      <IfModule !mod_auth_core.c>
+      # httpd 2.2
+      Order deny, allow
+      Deny from all
+      Allow from all
+      </IfModule>
+      </Directory>
+      .....
+      <Directory /usr/share/cacti/>
+      Order Deny, Allow
+      Deny from all
+      Allow from 192.168.0.111 // el ip de centOs7
+      </Directory>
+# systemctl restart httpd.service
+# mkdir -p /var/log/cacti
+# cd /var/log/cacti/
+#touch cacti.log
+#vi /etc/cron.d/cacti
+---> Se abrirá un editor de texto tipo none (para terminal) donde deberás quitare el #
+      */5 * * * * cacti /usr/bin/php /usr/share/cacti/poller.php > /dev/null 2>&1
+ //Todo este proceso se realiza en la terminal de CENTOS7 por el virtualbox// 
+ 
+
+ 
+ 
+
+
+ 
